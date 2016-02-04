@@ -10,13 +10,9 @@
 #include <CKVex.h>
 
 
-TVexJoysticks JoyChDriveX = JoyChLX;
-TVexJoysticks JoyChDriveY = JoyChLY;
-TVexJoysticks JoyChDriveR = JoyChRX;
-
-#define getJoyDriveY()	( getJoystickValue(JoyChDriveY) / ControllerJoyMax )
-#define getJoyDriveX()	( getJoystickValue(JoyChDriveX) / ControllerJoyMax )
-#define getJoyDriveR()	( getJoystickValue(JoyChDriveR) / ControllerJoyMax )
+TVexJoysticks JoyChDriveX = ChJoyLX;
+TVexJoysticks JoyChDriveY = ChJoyLY;
+TVexJoysticks JoyChDriveR = ChJoyRX;
 
 
 const int MaxNWheels = 8;
@@ -34,6 +30,9 @@ task main() {
 
 	tMotor ports[] = { mpDriveA, mpDriveB, mpDriveC };
 	NWheels = 3;
+	for( int i = 0; i < NWheels; ++i ){
+		MotorPorts[i] = ports[i];
+	}
 	InitialWheelHeading = degreesToRadians(60);
 
 	// Compute the orientation of each wheel based on the assumption that
@@ -61,9 +60,9 @@ task main() {
 		robotHeading = degreesToRadians(robotHeading);
 
 		// First obtain the joystick components: X, Y, and R
-		float driveY = getJoyDriveY();
-		float driveX = getJoyDriveX();
-		float driveRotation = -getJoyDriveR();
+		float driveY = joystick(JoyChDriveY);
+		float driveX = joystick(JoyChDriveX);
+		float driveRotation = -joystick(JoyChDriveR);
 		// Negative of the the rotational joystick because leftward rotation
 		// is actually positive rotation about the vertical axis.
 
@@ -79,7 +78,7 @@ task main() {
 			// For example, 0 or 180 would mean that this wheel is perfectly aligned with
 			// the translational drive direction, and 90 or 270 would mean that it is
 			// perfectly perpendicular.
-			float angleWithTarget = ( driveHeading - WheelHeadings[i] );
+			float angleWithTarget = driveHeading - WheelHeadings[i];
 
 			// Incorporate both the translational vector (relative to this wheel), as
 			// well as the rotation.  This addition of the rotation is what causes
@@ -97,9 +96,9 @@ task main() {
 		// If any of the calculated motor powers are greater than full power,
 		// we need to reduce all motor powers by the same factor such that
 		// the motor with the greatest power is given full power.
-		float powerFactor = MotorPowerMax * (maxPower > 1.0 ? (1.0/maxPower) : 1.0);
+		float powerFactor = maxPower > 1.0 ? (1.0/maxPower) : 1.0;
 		for( int i = 0; i < NWheels; ++i ){
-			motor[ MotorPorts[i] ] = (int)round( powerFactor * wheelPowers[i] );
+			setMotorPower( MotorPorts[i], powerFactor * wheelPowers[i] );
 		}
 	}
 }
