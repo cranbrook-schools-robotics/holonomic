@@ -87,7 +87,9 @@ task usercontrol()
 		//int joyR = vexRT[Ch2];
 		//motor[mDriveBL] = motor[mDriveFL] = joyL;
 		//motor[mDriveBR] = motor[mDriveFR] = joyR;
-  	float robotHeading = degreesToRadians(SensorValue[gyroPort] / 10.0);
-  	setDriveXYR(base, joystick(ChJoyLX), joystick(ChJoyLY), joystick(ChJoyRX));
+  	float robotHeading = degreesToRadians( (SensorValue[gyroPort] / 10.0) * 9/7 );
+  	//writeDebugStreamLine("%.2f", robotHeading);
+  	setDriveXYRFieldBased(base, joystick(ChJoyLX), joystick(ChJoyLY), joystick(ChJoyRX), robotHeading);
+  	delay(30);
   }
 }
